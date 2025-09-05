@@ -86,39 +86,24 @@ class AudioFeatureExtractor:
         else:
             raise ValueError(f"Descriptor '{descriptor}' is not recognized.")
 
-    def extract(self, file_name: str, feature_type: str) -> pd.DataFrame:
-        """
-        Extract features from an audio file.
-
-        Parameters:
-        - file_name (str): Path to audio file
-        - feature_type (str): 'mfccs', 'lfccs', or 'spectral_shape_descriptors'
-
-        Returns:
-        - DataFrame: Extracted features
-        """
+    def extract(self, file_name: str, feature_type: str) -> np.ndarray:
         signal_audio, sr = librosa.load(file_name, sr=self.sample_rate)
-        df = pd.DataFrame()
-        n = 0
-
+    
         if feature_type == 'mfccs':
-            MFCCs = librosa.feature.mfcc(y=signal_audio, sr=self.sample_rate, n_fft=self.n_fft,
-                                         hop_length=self.hop_length, n_mfcc=13, n_mels=26)
-            for m in range(13):
-                df.loc[n, f'mfccs_{m}'] = np.mean(MFCCs[m, :])
-
+            MFCCs = librosa.feature.mfcc(y=signal_audio, sr=self.sample_rate,
+                                         n_fft=self.n_fft, hop_length=self.hop_length,
+                                         n_mfcc=13, n_mels=26)
+            return np.mean(MFCCs, axis=1)  # shape (13,)
+    
         elif feature_type == 'lfccs':
-            LFCCs = manual_lfcc(y=signal_audio, sr=self.sample_rate, n_fft=self.n_fft,
-                                hop_length=self.hop_length, n_lfcc=13)
-            for m in range(13):
-                df.loc[n, f'lfccs_{m}'] = np.mean(LFCCs[m, :])
-
+            LFCCs = manual_lfcc(y=signal_audio, sr=self.sample_rate,
+                                n_fft=self.n_fft, hop_length=self.hop_length,
+                                n_lfcc=13)
+            return np.mean(LFCCs, axis=1)  # shape (13,)
+    
         elif feature_type == 'spectral_shape_descriptors':
             descriptors = ['centroid', 'spread', 'flux', 'zcr', 'rms']
-            for d in descriptors:
-                df.loc[n, d] = self._spectral_descriptors(signal_audio, descriptor=d).mean()
-
+            return np.array([self._spectral_descriptors(signal_audio, d).mean() for d in descriptors])
+    
         else:
             raise ValueError(f"Feature type '{feature_type}' is not recognized.")
-
-        return df
