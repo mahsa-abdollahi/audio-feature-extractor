@@ -58,10 +58,10 @@ class AudioFeatureExtractor:
             flux = np.sum(np.abs(np.diff(X, axis=1)), axis=0)
             return flux
 
-         elif descriptor == 'flatness':
-             flatness = librosa.feature.spectral_flatness(y=signal, n_fft=self.n_fft, hop_length=self.hop_length)
-             return flatness
-    
+        elif descriptor == 'flatness':
+            flatness = librosa.feature.spectral_flatness(y=signal, n_fft=self.n_fft, hop_length=self.hop_length)
+            return flatness
+                
         elif descriptor == 'rolloff':
             rolloff =  librosa.feature.spectral_rolloff(y=signal, sr=self.sample_rate, n_fft=self.n_fft, hop_length=self.hop_length, roll_percent=0.85)
             return rolloff
