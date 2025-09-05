@@ -41,8 +41,6 @@ class AudioFeatureExtractor:
                                     axis=0, keepdims=True))
             return spread
 
-
-
         elif descriptor == 'skewness':
             cent = librosa.feature.spectral_centroid(y=signal, sr=sample_rate, n_fft=n_fft, hop_length=512)
             spread = np.sqrt(np.sum(((freq - cent)**2) * librosa.util.normalize(X, norm=1, axis=0), axis=0, keepdims=True))
