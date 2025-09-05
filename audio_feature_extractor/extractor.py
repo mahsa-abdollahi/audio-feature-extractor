@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import librosa
 
-from .utils import manual_lfcc
+from audio_feature_extractor.utils import manual_lfcc
 
 
 class AudioFeatureExtractor:
