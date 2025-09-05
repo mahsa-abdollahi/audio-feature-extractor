@@ -86,24 +86,31 @@ class AudioFeatureExtractor:
         else:
             raise ValueError(f"Descriptor '{descriptor}' is not recognized.")
 
-    def extract(self, file_name: str, feature_type: str) -> np.ndarray:
-        signal_audio, sr = librosa.load(file_name, sr=self.sample_rate)
-    
-        if feature_type == 'mfccs':
-            MFCCs = librosa.feature.mfcc(y=signal_audio, sr=self.sample_rate,
-                                         n_fft=self.n_fft, hop_length=self.hop_length,
-                                         n_mfcc=13, n_mels=26)
-            return np.mean(MFCCs, axis=1)  # shape (13,)
-    
-        elif feature_type == 'lfccs':
-            LFCCs = manual_lfcc(y=signal_audio, sr=self.sample_rate,
-                                n_fft=self.n_fft, hop_length=self.hop_length,
-                                n_lfcc=13)
-            return np.mean(LFCCs, axis=1)  # shape (13,)
-    
-        elif feature_type == 'spectral_shape_descriptors':
+    def extract_mfcc(self, signal: np.ndarray, n_mfcc: int = 13, n_mels: int = 26) -> np.ndarray:
+        MFCCs = librosa.feature.mfcc(y=signal, sr=self.sample_rate,
+                                     n_fft=self.n_fft, hop_length=self.hop_length,
+                                     n_mfcc=n_mfcc, n_mels=n_mels)
+        return np.mean(MFCCs, axis=1)
+
+    def extract_lfcc(self, signal: np.ndarray, n_lfcc: int = 13) -> np.ndarray:
+        LFCCs = manual_lfcc(y=signal, sr=self.sample_rate,
+                            n_fft=self.n_fft, hop_length=self.hop_length,
+                            n_lfcc=n_lfcc)
+        return np.mean(LFCCs, axis=1)
+
+    def extract_spectral_descriptors(self, signal: np.ndarray, descriptors=None) -> np.ndarray:
+        if descriptors is None:
             descriptors = ['centroid', 'spread', 'flux', 'zcr', 'rms']
-            return np.array([self._spectral_descriptors(signal_audio, d).mean() for d in descriptors])
-    
+        return np.array([self._spectral_descriptors(signal, d).mean() for d in descriptors])
+
+    def extract(self, file_name: str, feature_type: str) -> np.ndarray:
+        signal, _ = librosa.load(file_name, sr=self.sample_rate)
+
+        if feature_type == 'mfccs':
+            return self.extract_mfcc(signal)
+        elif feature_type == 'lfccs':
+            return self.extract_lfcc(signal)
+        elif feature_type == 'spectral_shape_descriptors':
+            return self.extract_spectral_descriptors(signal)
         else:
             raise ValueError(f"Feature type '{feature_type}' is not recognized.")
