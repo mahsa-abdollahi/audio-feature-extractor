@@ -1,16 +1,17 @@
 from audio_feature_extractor.extractor import AudioFeatureExtractor
-import numpy as np
 
 if __name__ == "__main__":
     # Initialize the extractor
     extractor = AudioFeatureExtractor(sample_rate=16000)
 
-    # Extract MFCC features as a NumPy array
-    features = extractor.extract("example.wav", feature_type="mfccs")
+    # Extract MFCCs
+    mfcc_features = extractor.extract("example.wav", feature_type="mfccs")
+    print("MFCC features:", mfcc_features)
 
-    # Print the array
-    print("Extracted features (NumPy array):")
-    print(features)
+    # Extract LFCCs
+    lfcc_features = extractor.extract("example.wav", feature_type="lfccs")
+    print("LFCC features:", lfcc_features)
 
-    # Optionally, print shape
-    print("Feature shape:", features.shape)
+    # Extract spectral shape descriptors
+    spectral_features = extractor.extract("example.wav", feature_type="spectral_shape_descriptors")
+    print("Spectral descriptors:", spectral_features)
