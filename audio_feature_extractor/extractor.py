@@ -41,10 +41,43 @@ class AudioFeatureExtractor:
                                     axis=0, keepdims=True))
             return spread
 
+
+
+        elif descriptor == 'skewness':
+            cent = librosa.feature.spectral_centroid(y=signal, sr=sample_rate, n_fft=n_fft, hop_length=512)
+            spread = np.sqrt(np.sum(((freq - cent)**2) * librosa.util.normalize(X, norm=1, axis=0), axis=0, keepdims=True))
+            skewness = np.sum(((freq - cent)**3) * librosa.util.normalize(X, norm=1, axis=0) / (spread)**3, axis=0, keepdims=True)
+            return skewness
+    
+        elif descriptor == 'kurtosis':
+            cent = librosa.feature.spectral_centroid(y=signal, sr=sample_rate, n_fft=n_fft, hop_length=512)
+            spread = np.sqrt(np.sum(((freq - cent)**2) * librosa.util.normalize(X, norm=1, axis=0), axis=0, keepdims=True))
+            kurtosis = np.sum(((freq - cent)**4) * librosa.util.normalize(X, norm=1, axis=0) / (spread)**4, axis=0, keepdims=True)
+            return kurtosis
+
+
         elif descriptor == 'flux':
             flux = np.sum(np.abs(np.diff(X, axis=1)), axis=0)
             return flux
 
+         elif descriptor == 'flatness':
+             flatness = librosa.feature.spectral_flatness(y=signal, n_fft=self.n_fft, hop_length=self.hop_length)
+             return flatness
+    
+        elif descriptor == 'rolloff':
+            rolloff =  librosa.feature.spectral_rolloff(y=signal, sr=self.sample_rate, n_fft=self.n_fft, hop_length=self.hop_length, roll_percent=0.85)
+            return rolloff
+
+        elif descriptor == 'crest':
+            crest = np.max(X, axis=0) / (np.sum(X, axis=0) / (np.max(freq) - np.min(freq)))
+            return crest
+
+        elif descriptor == 'entropy':
+            eps = np.finfo(float).eps  # Small epsilon value to avoid log(0) issues
+            entropy = -np.sum((X + eps) * np.log(X + eps), axis=0, keepdims=True) / np.log(np.max(freq) - np.min(freq))
+            return entropy
+
+        
         elif descriptor == 'zcr':
             return librosa.feature.zero_crossing_rate(y=signal, frame_length=self.n_fft,
                                                       hop_length=self.hop_length)
